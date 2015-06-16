@@ -29,8 +29,8 @@ def main():
     redeem_features = pd.read_csv('redeem_features.csv', index_col = 'report_date', parse_dates = 'report_date')
     result = pd.read_csv('result.csv', index_col = 'time', parse_dates = 'time')
 
-    purchase_trian_y = result['20140601':]['purchase']
-    redeem_train_y = result['20140601':]['redeem']
+    purchase_trian_y = result['20140531':]['purchase']
+    redeem_train_y = result['20140531':]['redeem']
     purchase_x = purchase_features['20140601':]
     redeem_x = redeem_features['20140601':]
 
@@ -42,8 +42,8 @@ def main():
     purchase_delta = delta(purchase_trian_y)
     redeem_delta = delta(redeem_train_y)
 
-    m1 = GradientBoostingRegressor(n_estimators=250, learning_rate=0.01, max_depth=3, random_state=0, loss='lad', min_samples_split=2).fit(purchase_x.values, purchase_trian_y)
-    m2 = GradientBoostingRegressor(n_estimators=250, learning_rate=0.01, max_depth=3, random_state=0, loss='lad', min_samples_split=2).fit(redeem_x.values, redeem_train_y)
+    m1 = GradientBoostingRegressor(n_estimators=250, learning_rate=0.01, max_depth=3, random_state=0, loss='lad', min_samples_split=2).fit(purchase_x.values, purchase_delta)
+    m2 = GradientBoostingRegressor(n_estimators=250, learning_rate=0.01, max_depth=3, random_state=0, loss='lad', min_samples_split=2).fit(redeem_x.values, redeem_delta)
 
     y_p_pre = list()
     y_r_pre = list()
@@ -90,10 +90,10 @@ def main():
             redeem_test_x.ix[i, 'week4'] = result.ix[j, 'redeem']
 
         p_pre = m1.predict(purchase_test_x.ix[i].values)
-        # p_pre += last_value_p
+        p_pre += last_value_p
         last_value_p = p_pre
         r_pre = m2.predict(redeem_test_x.ix[i].values)
-        # r_pre += last_value_r
+        r_pre += last_value_r
         last_value_r = r_pre
 
         y_p_pre.append(p_pre)

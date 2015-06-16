@@ -5,6 +5,48 @@ from sklearn import svm
 import numpy as np
 import datetime
 
+def normalized(X_list):
+    max_list = list()
+    tmp_result = list()
+    result = list()
+    for i in X_list.columns:
+        tmp = np.array(X_list[i])
+        max_list.append((tmp.max(), tmp.min()))
+        line = list()
+        for j in tmp:
+            value = (j - tmp.min()) / (tmp.max() - tmp.min())
+            line.append(value)
+        tmp_result.append(line)
+
+    for i in range(len(tmp_result[0])):
+        line = list()
+        for j in range(len(tmp_result)):
+            line.append(tmp_result[j][i])
+        result.append(line)
+
+    return max_list, result
+
+def normalized_test(X_test, max_list):
+    tmp_result = list()
+    result = list()
+    count = -1
+    for i in X_test.columns:
+        count += 1
+        tmp = np.array(X_test[i])
+        line = list()
+        for j in tmp:
+            value = (j - max_list[count][1]) / (max_list[count][0] - max_list[count][1])
+            line.append(value)
+        tmp_result.append(line)
+
+    for i in range(len(tmp_result[0])):
+        line = list()
+        for j in range(len(tmp_result)):
+            line.append(tmp_result[j][i])
+        result.append(line)
+
+    return result
+
 def error(Y1, Y2):
     result = list()
     count = 0
@@ -25,8 +67,8 @@ def delta(origin):
     return delta
 
 def test1():
-    purchase_features = pd.read_csv('purchase_features.csv', index_col = 'report_date', parse_dates = 'report_date')
-    redeem_features = pd.read_csv('redeem_features.csv', index_col = 'report_date', parse_dates = 'report_date')
+    purchase_features = pd.read_csv('./data/purchase_features.csv', index_col = 'report_date', parse_dates = 'report_date')
+    redeem_features = pd.read_csv('./data/redeem_features.csv', index_col = 'report_date', parse_dates = 'report_date')
     result = pd.read_csv('result.csv', index_col = 'time', parse_dates = 'time')
 
     purchase_trian_y = result['20140401':'20140630']['purchase']
@@ -39,11 +81,13 @@ def test1():
     purchase_test_x = purchase_features['20140701':'20140731']
     redeem_test_x = redeem_features['20140701':'20140731']
 
-    purchase_delta = delta(purchase_trian_y)
-    redeem_delta = delta(redeem_train_y)
+    max_list_purchase, purchase_norm = normalized(purchase_x)
+    max_list_redeem, redeem_norm = normalized(redeem_x)
+    purchase_y_norm = normalized_test(purchase_test_x, max_list_purchase)
+    redeem_y_norm = normalized_test(redeem_test_x, max_list_redeem)
 
-    m1 = GradientBoostingRegressor(n_estimators=350, learning_rate=0.01, max_depth=4, random_state=0, loss='lad', min_samples_split=2).fit(purchase_x.values, purchase_trian_y)
-    m2 = GradientBoostingRegressor(n_estimators=350, learning_rate=0.01, max_depth=4, random_state=0, loss='lad', min_samples_split=2).fit(redeem_x.values, redeem_train_y)
+    m1 = GradientBoostingRegressor(n_estimators=500, learning_rate=0.01, max_depth=4, random_state=0, loss='lad', min_samples_split=2).fit(purchase_x, purchase_trian_y)
+    m2 = GradientBoostingRegressor(n_estimators=500, learning_rate=0.01, max_depth=4, random_state=0, loss='lad', min_samples_split=2).fit(redeem_x, redeem_train_y)
 
     y_p_pre = list()
     y_r_pre = list()
@@ -69,10 +113,10 @@ def test1():
             purchase_test_x.ix[i, 'week4'] = y_p_pre[i-28]
             redeem_test_x.ix[i, 'week4'] = y_r_pre[i-28]
 
-        p_pre = m1.predict(purchase_test_x.ix[i].values)
+        p_pre = m1.predict(purchase_y_norm[i])
         # p_pre += last_value_p
         last_value_p = p_pre
-        r_pre = m2.predict(redeem_test_x.ix[i].values)
+        r_pre = m2.predict(redeem_y_norm[i])
         # r_pre += last_value_r
         last_value_r = r_pre
 
@@ -83,8 +127,8 @@ def test1():
     print "redeem mean/var error", error(redeem_test_y, y_r_pre)
 
 def test2():
-    purchase_features = pd.read_csv('purchase_features.csv', index_col = 'report_date', parse_dates = 'report_date')
-    redeem_features = pd.read_csv('redeem_features.csv', index_col = 'report_date', parse_dates = 'report_date')
+    purchase_features = pd.read_csv('./data/purchase_features.csv', index_col = 'report_date', parse_dates = 'report_date')
+    redeem_features = pd.read_csv('./data/redeem_features.csv', index_col = 'report_date', parse_dates = 'report_date')
     result = pd.read_csv('result.csv', index_col = 'time', parse_dates = 'time')
 
     purchase_trian_y = result['20140501':'20140731']['purchase']
@@ -97,10 +141,13 @@ def test2():
     purchase_test_x = purchase_features['20140801':]
     redeem_test_x = redeem_features['20140801':]
 
-    purchase_delta = delta(purchase_trian_y)
-    redeem_delta = delta(redeem_train_y)
-    m1 = GradientBoostingRegressor(n_estimators=350, learning_rate=0.01, max_depth=4, random_state=0, loss='lad', min_samples_split=2).fit(purchase_x.values, purchase_trian_y)
-    m2 = GradientBoostingRegressor(n_estimators=350, learning_rate=0.01, max_depth=4, random_state=0, loss='lad', min_samples_split=2).fit(redeem_x.values, redeem_train_y)
+    max_list_purchase, purchase_norm = normalized(purchase_x)
+    max_list_redeem, redeem_norm = normalized(redeem_x)
+    purchase_y_norm = normalized_test(purchase_test_x, max_list_purchase)
+    redeem_y_norm = normalized_test(redeem_test_x, max_list_redeem)
+
+    m1 = GradientBoostingRegressor(n_estimators=500, learning_rate=0.01, max_depth=4, random_state=0, loss='lad', min_samples_split=2).fit(purchase_x, purchase_trian_y)
+    m2 = GradientBoostingRegressor(n_estimators=500, learning_rate=0.01, max_depth=4, random_state=0, loss='lad', min_samples_split=2).fit(redeem_x, redeem_train_y)
 
     y_p_pre = list()
     y_r_pre = list()
@@ -113,39 +160,23 @@ def test2():
             purchase_test_x.ix[i, 'yesterday_redeem'] = last_value_r
             redeem_test_x.ix[i, 'yesterday_purchase'] = last_value_p
             redeem_test_x.ix[i, 'yesterday_redeem'] = last_value_r
-        if i-7 >= 0:
-            purchase_test_x.ix[i, 'week1'] = y_p_pre[i-7]
-            redeem_test_x.ix[i, 'week1'] = y_r_pre[i-7]
-        else:
-            j = str(20140725 + i)
-            purchase_test_x.ix[i, 'week1'] = result.ix[j, 'purchase']
-            redeem_test_x.ix[i, 'week1'] = result.ix[j, 'redeem']
-        if i-14 >= 0:
-            purchase_test_x.ix[i, 'week2'] = y_p_pre[i-14]
-            redeem_test_x.ix[i, 'week2'] = y_r_pre[i-14]
-        else:
-            j = str(20140718 + i)
-            purchase_test_x.ix[i, 'week2'] = result.ix[j, 'purchase']
-            redeem_test_x.ix[i, 'week2'] = result.ix[j, 'redeem']
-        if i-21 >= 0:
-            purchase_test_x.ix[i, 'week3'] = y_p_pre[i-21]
-            redeem_test_x.ix[i, 'week3'] = y_r_pre[i-21]
-        else:
-            j = str(20140711 + i)
-            purchase_test_x.ix[i, 'week3'] = result.ix[j, 'purchase']
-            redeem_test_x.ix[i, 'week3'] = result.ix[j, 'redeem']
-        if i-28 >= 0:
-            purchase_test_x.ix[i, 'week4'] = y_p_pre[i-28]
-            redeem_test_x.ix[i, 'week4'] = y_r_pre[i-28]
-        else:
-            j = str(20140704 + i)
-            purchase_test_x.ix[i, 'week4'] = result.ix[j, 'purchase']
-            redeem_test_x.ix[i, 'week4'] = result.ix[j, 'redeem']
+        # if i-7 >= 0:
+        #     purchase_test_x.ix[i, 'week1'] = y_p_pre[i-7]
+        #     redeem_test_x.ix[i, 'week1'] = y_r_pre[i-7]
+        # if i-14 >= 0:
+        #     purchase_test_x.ix[i, 'week2'] = y_p_pre[i-14]
+        #     redeem_test_x.ix[i, 'week2'] = y_r_pre[i-14]
+        # if i-21 >= 0:
+        #     purchase_test_x.ix[i, 'week3'] = y_p_pre[i-21]
+        #     redeem_test_x.ix[i, 'week3'] = y_r_pre[i-21]
+        # if i-28 >= 0:
+        #     purchase_test_x.ix[i, 'week4'] = y_p_pre[i-28]
+        #     redeem_test_x.ix[i, 'week4'] = y_r_pre[i-28]
 
-        p_pre = m1.predict(purchase_test_x.ix[i].values)
+        p_pre = m1.predict(purchase_y_norm[i])
         # p_pre += last_value_p
         last_value_p = p_pre
-        r_pre = m2.predict(redeem_test_x.ix[i].values)
+        r_pre = m2.predict(redeem_y_norm[i])
         # r_pre += last_value_r
         last_value_r = r_pre
 
