@@ -22,10 +22,17 @@ def error_plot(test, predict, title):
     plt.legend()
     plt.title(str(title))
     plt.grid()
-#     plt.show()
+    plt.show()
     print "sum of squared relative errors: ", (relative_errors * relative_errors).sum()
     print "mean of absolute errors: ", np.mean(np.abs(relative_errors))
     print "std of errors: ", np.std(relative_errors)
     
+def get_metrics(test, predict):
+    relative_errors = relative_error(test, predict)
+    return [(relative_errors * relative_errors).sum(), np.mean(np.abs(relative_errors)), np.std(relative_errors)]
+
+def residual_analysis(test, predict):
+    residual = test - predict
+    
 if __name__ == '__main__':
-    pass
+    print np.array([1,2]) * np.array([1,2])

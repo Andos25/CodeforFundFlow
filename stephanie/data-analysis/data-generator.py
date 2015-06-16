@@ -2,6 +2,7 @@
 import pandas as pd
 import matplotlib.pyplot as plt
 from statsmodels.tsa.arima_model import ARIMA
+import numpy as np
 
 cleaned = '/home/lt/data/tianchi/cleaned/'
 # 2014.04.01~2014.07.31
@@ -52,9 +53,46 @@ def gen_online_offline_X():
     offline_test_X_redeem.to_csv(offline_test+'X_redeem.csv', index_label='report_date')
     online_train_X_purchase.to_csv(online_train+'X_purchase.csv', index_label='report_date')
     online_train_X_redeem.to_csv(online_train+'X_redeem.csv', index_label='report_date')
-    online_test_X_purchase.to_csv(online_test+'X_redeem.csv', index_label='report_date')
+    online_test_X_purchase.to_csv(online_test+'X_purchase.csv', index_label='report_date')
     online_test_X_redeem.to_csv(online_test+'X_redeem.csv', index_label='report_date')
+    
+def check():
+    online = '/home/lt/data/tianchi/cleaned/online/'
+    offline = '/home/lt/data/tianchi/cleaned/offline/'
+    online_train_X_purchase = pd.read_csv(online+'train/X_purchase.csv', header=0)
+    online_train_X_redeem = pd.read_csv(online+'train/X_redeem.csv', header=0)
+    online_test_X_purchase = pd.read_csv(online+'test/X_purchase.csv', header=0)
+    online_test_X_redeem = pd.read_csv(online+'test/X_redeem.csv', header=0)
+    offline_train_X_purchase = pd.read_csv(offline+'train/X_purchase.csv', header=0)
+    offline_train_X_redeem = pd.read_csv(offline+'train/X_redeem.csv', header=0)
+    offline_test_X_purchase = pd.read_csv(offline+'test/X_purchase.csv', header=0)
+    offline_test_X_redeem = pd.read_csv(offline+'test/X_redeem.csv', header=0)
+    print online_train_X_purchase.columns
+    print online_train_X_redeem.columns
+    print online_test_X_purchase.columns
+    print online_test_X_redeem.columns
+    print offline_train_X_purchase.columns
+    print offline_train_X_redeem.columns
+    print offline_test_X_purchase.columns
+    print offline_test_X_redeem.columns
+    
+def first_day_work():
+    shouldwork = pd.read_csv(cleaned+'purchase_features.csv', header=0, parse_dates='report_date')
+    indexs = []
+    for index in shouldwork.index.values:
+        if shouldwork.ix[index]['shouldwork'] == 1 and shouldwork.ix[index-1]['shouldwork'] == 0:
+            indexs.append(index)
+    purchase = pd.read_csv(cleaned+'purchase_by_day.csv', header=0)
+    df = pd.DataFrame(columns=['report_date', 'purchase', 'redeem'])
+    i = 0
+    for index in indexs:
+        date = purchase.ix[index]['report_date']
+        p = purchase.ix[index]['total_purchase_amt']
+        r = purchase.ix[index]['total_redeem_amt']
+        df = df.append(pd.DataFrame([[date, p, r]], columns=['report_date', 'purchase', 'redeem']))
+    print df['redeem'].values.mean()
     
 if __name__ == '__main__':
     gen_online_offline_X()
-    
+    check()
+#     first_day_work()

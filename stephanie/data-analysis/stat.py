@@ -5,6 +5,7 @@ import matplotlib.pyplot as plt
 tianchi = '/home/lt/data/tianchi/'
 stat = tianchi + 'stat/'
 cleaned_path = tianchi + 'cleaned/'
+by_user = tianchi + 'by_user/'
 
 def group_and_save(user_profile):
     user_balance = pd.read_csv(tianchi + 'user_balance_table.csv', header=0, index_col='user_id', parse_dates='report_date')
@@ -44,12 +45,20 @@ def tuhao_diaosi():
     tuhao = direct[direct['direct_purchase_mean']>=500000]['user_id']
     tuhao_balance = balance[balance['user_id'].isin(tuhao)]
     pingmin_balance = balance[~balance['user_id'].isin(tuhao)]
-    plt.plot(tuhao_balance.groupby('report_date')['total_purchase_amt'].sum())
+#     plt.plot(tuhao_balance.groupby('report_date')['total_purchase_amt'].sum())
     plt.plot(pingmin_balance.groupby('report_date')['total_purchase_amt'].sum())
-    plt.legend(['tuhao','pingmin'])
+    plt.plot(pingmin_balance.groupby('report_date')['total_redeem_amt'].sum())
+#     plt.legend(['tuhao','pingmin'])
     plt.show()
-    
+    tuhao_balance.to_csv(by_user + 'tuhao_balance.csv', index=False)
+    pingmin_balance.to_csv(by_user + 'pingmin_balance.csv')
     user = pd.read_csv('/home/lt/data/tianchi/user_profile_table.csv',header=0)
     tuhao_profile = user[user['user_id'].isin(tuhao)]
+
+def user_by_month():
+    user_balance = pd.read_csv(tianchi + 'user_balance_table.csv', header=0, parse_dates='report_date')
+    grp_date = user_balance.groupby("report_date")
+    
+    
 if __name__ == '__main__':
     tuhao_diaosi()
