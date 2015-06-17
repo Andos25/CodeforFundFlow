@@ -140,15 +140,13 @@ def main():
             redeem_test_x.ix[i, 'week4_redeem'] = result.ix[j, 'redeem']
 
         test_x_p = simple_norm(purchase_test_x.ix[i].values, max_list_purchase)
-        print test_x_p
         p_pre = m1.predict(test_x_p)
-        print p_pre
-        # p_pre += last_value_p
         last_value_p = p_pre
+        print purchase_test_x.ix[i].values
+        print p_pre
 
         test_x_r = simple_norm(redeem_test_x.ix[i].values, max_list_redeem) 
         r_pre = m2.predict(test_x_r)
-        # r_pre += last_value_r
         last_value_r = r_pre
 
         y_p_pre.append(p_pre)

@@ -66,6 +66,13 @@ def delta(origin):
         delta[i] = origin[i + 1] - origin[i]
     return delta
 
+def simple_norm(X, max_list):
+    result = list()
+    for i in range(len(max_list)):
+        value = (X[i] - max_list[i][1]) / (max_list[i][0] - max_list[i][1])
+        result.append(value)
+    return result
+
 def test1():
     purchase_features = pd.read_csv('./data/purchase_features.csv', index_col = 'report_date', parse_dates = 'report_date')
     redeem_features = pd.read_csv('./data/redeem_features.csv', index_col = 'report_date', parse_dates = 'report_date')
@@ -83,11 +90,11 @@ def test1():
 
     max_list_purchase, purchase_norm = normalized(purchase_x)
     max_list_redeem, redeem_norm = normalized(redeem_x)
-    purchase_y_norm = normalized_test(purchase_test_x, max_list_purchase)
-    redeem_y_norm = normalized_test(redeem_test_x, max_list_redeem)
+    # purchase_y_norm = normalized_test(purchase_test_x, max_list_purchase)
+    # redeem_y_norm = normalized_test(redeem_test_x, max_list_redeem)
 
-    m1 = GradientBoostingRegressor(n_estimators=500, learning_rate=0.01, max_depth=4, random_state=0, loss='lad', min_samples_split=2).fit(purchase_x, purchase_trian_y)
-    m2 = GradientBoostingRegressor(n_estimators=500, learning_rate=0.01, max_depth=4, random_state=0, loss='lad', min_samples_split=2).fit(redeem_x, redeem_train_y)
+    m1 = GradientBoostingRegressor(n_estimators=50, learning_rate=0.1, max_depth=3, random_state=0, loss='ls', min_samples_split=10).fit(purchase_x, purchase_trian_y)
+    m2 = GradientBoostingRegressor(n_estimators=50, learning_rate=0.1, max_depth=3, random_state=0, loss='ls', min_samples_split=10).fit(redeem_x, redeem_train_y)
 
     y_p_pre = list()
     y_r_pre = list()
@@ -97,27 +104,41 @@ def test1():
     for i in range(31):
         if i != 0:
             purchase_test_x.ix[i, 'yesterday_purchase'] = last_value_p
-            purchase_test_x.ix[i, 'yesterday_redeem'] = last_value_r
-            redeem_test_x.ix[i, 'yesterday_purchase'] = last_value_p
             redeem_test_x.ix[i, 'yesterday_redeem'] = last_value_r
         if i-7 >= 0:
-            purchase_test_x.ix[i, 'week1'] = y_p_pre[i-7]
-            redeem_test_x.ix[i, 'week1'] = y_r_pre[i-7]
+            purchase_test_x.ix[i, 'week1_purchase'] = y_p_pre[i-7]
+            redeem_test_x.ix[i, 'week1_redeem'] = y_r_pre[i-7]
+        else:
+            j = str(20140624 + i)
+            purchase_test_x.ix[i, 'week1_purchase'] = result.ix[j, 'purchase']
+            redeem_test_x.ix[i, 'week1_redeem'] = result.ix[j, 'redeem']
         if i-14 >= 0:
-            purchase_test_x.ix[i, 'week2'] = y_p_pre[i-14]
-            redeem_test_x.ix[i, 'week2'] = y_r_pre[i-14]
+            purchase_test_x.ix[i, 'week2_purchase'] = y_p_pre[i-14]
+            redeem_test_x.ix[i, 'week2_redeem'] = y_r_pre[i-14]
+        else:
+            j = str(20140617 + i)
+            purchase_test_x.ix[i, 'week2_purchase'] = result.ix[j, 'purchase']
+            redeem_test_x.ix[i, 'week2_redeem'] = result.ix[j, 'redeem']
         if i-21 >= 0:
-            purchase_test_x.ix[i, 'week3'] = y_p_pre[i-21]
-            redeem_test_x.ix[i, 'week3'] = y_r_pre[i-21]
+            purchase_test_x.ix[i, 'week3_purchase'] = y_p_pre[i-21]
+            redeem_test_x.ix[i, 'week3_redeem'] = y_r_pre[i-21]
+        else:
+            j = str(20140610 + i)
+            purchase_test_x.ix[i, 'week3_purchase'] = result.ix[j, 'purchase']
+            redeem_test_x.ix[i, 'week3_redeem'] = result.ix[j, 'redeem']
         if i-28 >= 0:
-            purchase_test_x.ix[i, 'week4'] = y_p_pre[i-28]
-            redeem_test_x.ix[i, 'week4'] = y_r_pre[i-28]
+            purchase_test_x.ix[i, 'week4_purchase'] = y_p_pre[i-28]
+            redeem_test_x.ix[i, 'week4_redeem'] = y_r_pre[i-28]
+        else:
+            j = str(20140603 + i)
+            purchase_test_x.ix[i, 'week4_purchase'] = result.ix[j, 'purchase']
+            redeem_test_x.ix[i, 'week4_redeem'] = result.ix[j, 'redeem']
 
-        p_pre = m1.predict(purchase_y_norm[i])
-        # p_pre += last_value_p
+        test_x_p = simple_norm(purchase_test_x.ix[i].values, max_list_purchase)
+        p_pre = m1.predict(test_x_p)
         last_value_p = p_pre
-        r_pre = m2.predict(redeem_y_norm[i])
-        # r_pre += last_value_r
+        test_x_r = simple_norm(redeem_test_x.ix[i].values, max_list_redeem) 
+        r_pre = m2.predict(test_x_r)
         last_value_r = r_pre
 
         y_p_pre.append(p_pre)
@@ -146,8 +167,8 @@ def test2():
     purchase_y_norm = normalized_test(purchase_test_x, max_list_purchase)
     redeem_y_norm = normalized_test(redeem_test_x, max_list_redeem)
 
-    m1 = GradientBoostingRegressor(n_estimators=500, learning_rate=0.01, max_depth=4, random_state=0, loss='lad', min_samples_split=2).fit(purchase_x, purchase_trian_y)
-    m2 = GradientBoostingRegressor(n_estimators=500, learning_rate=0.01, max_depth=4, random_state=0, loss='lad', min_samples_split=2).fit(redeem_x, redeem_train_y)
+    m1 = GradientBoostingRegressor(n_estimators=50, learning_rate=0.1, max_depth=3, random_state=0, loss='lad', min_samples_split=10).fit(purchase_x, purchase_trian_y)
+    m2 = GradientBoostingRegressor(n_estimators=50, learning_rate=0.1, max_depth=3, random_state=0, loss='ls', min_samples_split=10).fit(redeem_x, redeem_train_y)
 
     y_p_pre = list()
     y_r_pre = list()
@@ -157,27 +178,41 @@ def test2():
     for i in range(31):
         if i != 0:
             purchase_test_x.ix[i, 'yesterday_purchase'] = last_value_p
-            purchase_test_x.ix[i, 'yesterday_redeem'] = last_value_r
-            redeem_test_x.ix[i, 'yesterday_purchase'] = last_value_p
             redeem_test_x.ix[i, 'yesterday_redeem'] = last_value_r
-        # if i-7 >= 0:
-        #     purchase_test_x.ix[i, 'week1'] = y_p_pre[i-7]
-        #     redeem_test_x.ix[i, 'week1'] = y_r_pre[i-7]
-        # if i-14 >= 0:
-        #     purchase_test_x.ix[i, 'week2'] = y_p_pre[i-14]
-        #     redeem_test_x.ix[i, 'week2'] = y_r_pre[i-14]
-        # if i-21 >= 0:
-        #     purchase_test_x.ix[i, 'week3'] = y_p_pre[i-21]
-        #     redeem_test_x.ix[i, 'week3'] = y_r_pre[i-21]
-        # if i-28 >= 0:
-        #     purchase_test_x.ix[i, 'week4'] = y_p_pre[i-28]
-        #     redeem_test_x.ix[i, 'week4'] = y_r_pre[i-28]
+        if i-7 >= 0:
+            purchase_test_x.ix[i, 'week1_purchase'] = y_p_pre[i-7]
+            redeem_test_x.ix[i, 'week1_redeem'] = y_r_pre[i-7]
+        else:
+            j = str(20140725 + i)
+            purchase_test_x.ix[i, 'week1_purchase'] = result.ix[j, 'purchase']
+            redeem_test_x.ix[i, 'week1_redeem'] = result.ix[j, 'redeem']
+        if i-14 >= 0:
+            purchase_test_x.ix[i, 'week2_purchase'] = y_p_pre[i-14]
+            redeem_test_x.ix[i, 'week2_redeem'] = y_r_pre[i-14]
+        else:
+            j = str(20140718 + i)
+            purchase_test_x.ix[i, 'week2_purchase'] = result.ix[j, 'purchase']
+            redeem_test_x.ix[i, 'week2_redeem'] = result.ix[j, 'redeem']
+        if i-21 >= 0:
+            purchase_test_x.ix[i, 'week3_purchase'] = y_p_pre[i-21]
+            redeem_test_x.ix[i, 'week3_redeem'] = y_r_pre[i-21]
+        else:
+            j = str(20140711 + i)
+            purchase_test_x.ix[i, 'week3_purchase'] = result.ix[j, 'purchase']
+            redeem_test_x.ix[i, 'week3_redeem'] = result.ix[j, 'redeem']
+        if i-28 >= 0:
+            purchase_test_x.ix[i, 'week4_purchase'] = y_p_pre[i-28]
+            redeem_test_x.ix[i, 'week4_redeem'] = y_r_pre[i-28]
+        else:
+            j = str(20140704 + i)
+            purchase_test_x.ix[i, 'week4_purchase'] = result.ix[j, 'purchase']
+            redeem_test_x.ix[i, 'week4_redeem'] = result.ix[j, 'redeem']
 
-        p_pre = m1.predict(purchase_y_norm[i])
-        # p_pre += last_value_p
+        test_x_p = simple_norm(purchase_test_x.ix[i].values, max_list_purchase)
+        p_pre = m1.predict(test_x_p)
         last_value_p = p_pre
-        r_pre = m2.predict(redeem_y_norm[i])
-        # r_pre += last_value_r
+        test_x_r = simple_norm(redeem_test_x.ix[i].values, max_list_redeem) 
+        r_pre = m2.predict(test_x_r)
         last_value_r = r_pre
 
         y_p_pre.append(p_pre)
