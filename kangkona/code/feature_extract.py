@@ -6,8 +6,6 @@ __author__ = 'kangkona'
 import pandas as pd
 
 
-
-
 diff = lambda j, pr_list, p_or_r:(pr_list[j][1] - pr_list[j][2])*1.0
 phrchase_diff = lambda pr_list, j : diff(j, pr_list, 1)
 redeem_diff = lambda pr_list, j : diff(j, pr_list, 2)
@@ -19,20 +17,19 @@ redeem_add = lambda pr_list, j : diff(j, pr_list, 2)
 #从资金流动的角度提取的特征
 #pr_tuples: (date, phrchase, redeem)
 def features_about_flow(pr_list, i):
-    features = [0 for k in range(14)]
+    features = [0 for k in range(7)]
     if i >= 8:
-        phrchase_diff_last_week = [phrchase_diff(pr_list, j) for j in range(i-1, i-8, -1)]
-        phrchase_add_last_week = [phrchase_add(pr_list, j) for j in range(i-1, i-8, -1)]
-        redeem_diff_last_week = [redeem_diff(pr_list, j) for j in range(i-1, i-8, -1)]
-        redeem_add_last_week = [redeem_add(pr_list, j) for j in range(i-1, i-8, -1)]
-        return tuple(phrchase_diff_last_week + phrchase_add_last_week), \
-        tuple(redeem_diff_last_week + redeem_add_last_week)
+        features = []
+        for j in range(i-1, i-8, -1):
+            feature = [pr_list[j][1] - pr_list[j][2]]
+            features = features + feature
+        return tuple(features), tuple(features)
     else:
         return tuple(features), tuple(features)
 
 
 def extract(pr_file, phrchase_file, redeem_file):
-    pr_total = pd.read_csv(pr_file, parse_dates = ['report_date'])
+    pr_total = pd.read_csv(pr_file, parse_dates = 'report_date')
     pr_list = [(pr_total.report_date[i], pr_total.total_purchase_amt[i], pr_total.total_redeem_amt[i]) \
                for i in range(len(pr_total.total_purchase_amt))]
     phrchase_features = []
@@ -42,7 +39,7 @@ def extract(pr_file, phrchase_file, redeem_file):
         phrchase_features.append(p)
         redeem_features.append(r)
     
-    relative_growth_rates = ["attr" + str(i) for i in range(1, 15)]
+    relative_growth_rates = ["attr" + str(i) for i in range(1, 8)]
     fout_phrchase = open(phrchase_file, "w")
     fout_phrchase.write(','.join(relative_growth_rates) + '\n')
     fout_phrchase.write('\n'.join([','.join([str(pfa) for pfa in pf]) for pf in phrchase_features]))

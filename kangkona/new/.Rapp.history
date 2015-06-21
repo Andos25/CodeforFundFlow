@@ -1,0 +1,177 @@
+library(TSA)
+win.graph(width=4.875, height=2.5, pointsize=8)
+win
+getOption("device")()
+dev.new(width=4.875, height=2.5, pointsize=8)
+data(larain);plot(larain, ylab='Inches', xlab='Year', type='0')
+data(larain);plot(larain, ylab='Inches', xlab='Year', type='o')
+library(tseries)
+air <- AirPassengers
+ts.plot(air)
+acf(air)
+pacf(air)
+x<-decompose(air)
+plot(x)
+plot(x$seasonal)
+air.fit <- arima(air,order=c(0,1,1), seasonal=list(order=c(0,1,1), period=12))
+tsdiag(air.fit)
+library(forecast)
+install.packages("forecast")
+library(forecast)
+air.forecast <- forecast(air.fit,12)
+plot.forecast(air.forecast)
+mean(abs(rnorm(100)))
+rnorm(10)
+x <- (1,2,4)
+x <- c(1,2,4)
+x
+q <- c(x,x,8)
+q
+x
+x[4]
+x[3]
+x[1]
+x[0]
+x[2:3]
+x[1:3]
+mean(x)
+sd(x)
+y <- mean(x)
+y
+y #print out y
+data()
+mean(Nile)
+sd(Nile)
+hist(Nile)
+# counts the number of odd intergers in x
+oddcount <- function(x) {}
+oddcount <- function(x) {
+k <- 0 #assign 0 to k
+for (n in x) {
+if (n %% 2 == 1) k <- k + 1
+}
+return(k)
+}
+oddcount(c(1,3,5))
+oddcount(c(1,3,5,7))
+oddcount(c(1,3,3,4,6,5,7))
+38 %% 7
+x <- c(1,3,4,5,6)
+for (n in x) {
+if (n %% 2 == 1) k <- k + 1
+}
+k <- 0
+for (n in x) {
+if (n %% 2 == 1) k <- k + 1
+}
+k
+z <- c(2,6,7)
+f <- function(x) x + y
+f
+f(2)
+y
+g <- function(x,y=2,z=T) {}
+g <- function(x,y=2,z=T) {
+if z {
+g <- function(x,y=2,z=T) {
+if (z) {
+print(x,y)
+}
+g(1,3)
+g(1,3,T)
+g <- function(x,y=2,z=T) {
+if (z) {
+print(x y)
+x <- 8
+x
+x[1]
+x[1][0]
+x[1][1]
+x[1][2]
+x[1][1]
+x[1][1][1]
+x = c(5,12,13)
+length(x)
+mode(x)
+length(y)
+z <- c("abc", "29 88")
+z
+length(z)
+mode(z)
+z <- c(1, "29 88")
+z
+mode(z)
+u <- paste("abd", "de", "f")
+u
+v <- strsplit(u, " ")
+v
+m <- rbind(c(1,4), c(2,2))
+m
+m <- cbind(c(1,4), c(2,2))
+m
+m %*% c(1,1)
+m[1,]
+m[,2]
+x <- list(u=2, v="abc")
+x
+x <- list(2, "abc")
+x
+x[1]
+x[2]
+x[[2]]
+x[[1]]
+x[[[1]]]
+x[[1]]
+hist(Nile)
+hn <- hist(Nile)
+hn
+str(hn)
+getwd()
+example(seq)
+example(persp)
+CMD command --help
+getwd()
+setwd("Code/ali/caseio/result")
+data <- read.table("out.csv", sep=",", header=T)
+data
+data$In
+data$Diff = data$In - data$Out
+data$Diff
+plot(data$Diff)
+library('xts')
+dataDiff <- xts(data$Diff, seq(as.POSIXct("2013-07-01"),len=length(data$Diff),by="day"))
+plot(dataDiff)
+getwd()
+data <- read.table("daily_balance_count.csv", sep=",", header=T)
+library('xts')
+data <- xts(data, seq(as.POSIXct("2013-07-01"),len=length(data),by="day"))
+data.plot()
+plot(data)
+data
+ls
+quit
+setwd("/Users/kangkona/Code/ali/CodeforFundFlow/kangkona/data")
+data <- xts(data, seq(as.POSIXct("2013-07-01"),len=length(data),by="day"))
+data <- read.table("daily_balance_count.csv", sep=",", header=T)
+data <- xts(data, seq(as.POSIXct("2013-07-01"),len=length(data),by="day"))
+plot(data)
+data
+str(data)
+datatb <- xts(data$tBalance, seq(as.POSIXct("2013-07-01"),len=length(data$tBalance),by="day"))
+datatb.plot()
+plot(datatb)
+datayb <- xts(data$yBalance, seq(as.POSIXct("2013-07-01"),len=length(data$yBalance),by="day"))
+plot(datayb)
+data_purchase_bank_amt <- xts(data$purchase_bank_amt, seq(as.POSIXct("2013-07-01"),len=length(data$purchase_bank_amt),by="day"))
+plot(data_purchase_bank_amt)
+data_purchase_bal_amt <- xts(data$purchase_bal_amt, seq(as.POSIXct("2013-07-01"),len=length(data$purchase_bank_amt),by="day"))
+plot(data_purchase_bal_amt)
+data_consume_amt <- xts(data$consume_amt, seq(as.POSIXct("2013-07-01"),len=length(data$purchase_bank_amt),by="day"))
+plot(data_consume_amt)
+data_transfer_amt <- xts(data$transfer_amt, seq(as.POSIXct("2013-07-01"),len=length(data$purchase_bank_amt),by="day"))
+plot(data_transfer_amt)
+data_tftobal_amt <- xts(data$tftobal_amt, seq(as.POSIXct("2013-07-01"),len=length(data$purchase_bank_amt),by="day"))
+plot(data_tftobal_amt)
+data_tftocard_amt <- xts(data$tftocard_amt, seq(as.POSIXct("2013-07-01"),len=length(data$purchase_bank_amt),by="day"))
+plot(data_tftocard_amt)
+plot(data$tftobal_amt,data$transfer_amt)
