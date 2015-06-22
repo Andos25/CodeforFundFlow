@@ -17,15 +17,16 @@ redeem_add = lambda pr_list, j : diff(j, pr_list, 2)
 #从资金流动的角度提取的特征
 #pr_tuples: (date, phrchase, redeem)
 def features_about_flow(pr_list, i):
-    features = [0 for k in range(7)]
-    if i >= 8:
-        features = []
-        for j in range(i-1, i-8, -1):
-            feature = [pr_list[j][1] - pr_list[j][2]]
-            features = features + feature
-        return tuple(features), tuple(features)
-    else:
-        return tuple(features), tuple(features)
+    return (i/7,), (i/7,)
+    # features = [0 for k in range(7)]
+    # if i >= 9:
+    #     features = []
+    #     for j in range(i-1, i-8, -1):
+    #         feature = [pr_list[j][1] - pr_list[j-1][1]]
+    #         features = features + feature
+    #     return tuple(features), tuple(features)
+    # else:
+    #     return tuple(features), tuple(features)
 
 
 def extract(pr_file, phrchase_file, redeem_file):
@@ -39,7 +40,7 @@ def extract(pr_file, phrchase_file, redeem_file):
         phrchase_features.append(p)
         redeem_features.append(r)
     
-    relative_growth_rates = ["attr" + str(i) for i in range(1, 8)]
+    relative_growth_rates = ["relative_days"]
     fout_phrchase = open(phrchase_file, "w")
     fout_phrchase.write(','.join(relative_growth_rates) + '\n')
     fout_phrchase.write('\n'.join([','.join([str(pfa) for pfa in pf]) for pf in phrchase_features]))
@@ -65,9 +66,9 @@ def merge_features(old_features_file, new_feature_file, merge_file):
     f_old.close()
 
 def main():
-    extract("../../features/purchase_by_day.csv", "../data/pf.csv", "../data/rf.csv")
-    merge_features("../../features/best_featureset_sofar/purchase_features.csv", "../data/pf.csv", "../data/purchase_features.csv")
-    merge_features("../../features/best_featureset_sofar/redeem_features.csv", "../data/rf.csv", "../data/redeem_features.csv")
+    extract("../new/daily_summary.csv", "../new/pf.csv", "../new/rf.csv")
+    merge_features("../../new/purchase_features.csv", "../new/pf.csv", "../new/purchase_features.csv")
+    merge_features("../../new/redeem_features.csv", "../new/rf.csv", "../new/redeem_features.csv")
 
 
 

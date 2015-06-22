@@ -3,7 +3,7 @@ import matplotlib.pyplot as plt
 import numpy as np
 
 def relative_error(real, predicted):
-    errors = (real - predicted) / real
+    errors = (predicted - real) / real
     return errors
 
 def data_compare(test, predict):
@@ -13,6 +13,7 @@ def data_compare(test, predict):
     plt.title('data compare')
     plt.grid()
     plt.show()
+
     
 def error_plot(test, predict, title):
     relative_errors = relative_error(test, predict)
