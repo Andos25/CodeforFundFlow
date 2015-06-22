@@ -80,8 +80,8 @@ def fill_features(date, sep, sep_purchase, sep_redeem, relativedays=0):
         online_test_X_redeem.ix[date,'yesterday_purchase'] = online_train_y_purchase.ix[yesterday, 'total_purchase_amt']
         online_test_X_redeem.ix[date,'yesterday_redeem'] = online_train_y_redeem.ix[yesterday, 'total_redeem_amt']
 
-    online_test_X_purchase.ix[date, 'relativedays'] = relativedays
-    online_test_X_redeem.ix[date, 'relativedays'] = relativedays
+    online_test_X_purchase.ix[date, 'relative_days'] = relativedays
+    online_test_X_redeem.ix[date, 'relative_days'] = relativedays
 
 
     # for i in range(1,8):
@@ -118,6 +118,7 @@ def online_predict():
     i = 0
     for date in sep:
         relativedays = 61 + i/7
+        # print relativedays
         i+=1
         fill_features(date, sep, sep_purchase, sep_redeem, relativedays)
         do_week(date -7, sep, date, sep_purchase, sep_redeem, 'week1')
@@ -201,7 +202,7 @@ def main():
 
 
     # offline
-    # offline_predict_purchase = offline_predict('purchase', offline_train_X_purchase, offline_train_y_purchase, offline_test_X_purchase)
+    # offline_predict_purchase = offline_predict('redeem', offline_train_X_purchase, offline_train_y_purchase, offline_test_X_purchase)
     # print relative_error(offline_test_y_purchase, offline_predict_purchase)
     # error_plot(offline_test_y_purchase, offline_predict_purchase, "")
     # residual_analysis(offline_test_y_purchase, offline_predict_purchase)
